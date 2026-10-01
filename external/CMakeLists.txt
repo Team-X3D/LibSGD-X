@@ -159,6 +159,8 @@ target_link_libraries(soloud ${LIBS})
 
 ##### json11 #####
 
+set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
+
 FetchContent_Declare(json11
 	GIT_REPOSITORY https://github.com/blitz-research/json11.git
 	GIT_TAG master
@@ -168,6 +170,8 @@ FetchContent_Declare(json11
 )
 
 FetchContent_MakeAvailable(json11)
+
+unset(CMAKE_POLICY_VERSION_MINIMUM)
 
 ##### stb #####
 
