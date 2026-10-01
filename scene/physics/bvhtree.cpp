@@ -281,6 +281,7 @@ void BVHTree::remove(BVHNode* node) {
 }
 
 void BVHTree::optimize() {
+	if (!m_root) return;
 	if (m_root->isLeaf()) return;
 
 	Vector<BVHNode*> leaves;
