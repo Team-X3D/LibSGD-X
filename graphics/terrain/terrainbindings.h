@@ -18,13 +18,17 @@ struct TerrainBindings : GraphicsResource {
 
 	Property<uint32_t> size{1024};
 	Property<uint32_t> lods{4};
-	Property<uint32_t> materialSize{1024};
+	Property<float> materialSize{1024};
 	Property<int> debugMode{0};
 
 	Property<CTexturePtr> heightTexture;
 	Property<CTexturePtr> normalTexture;
 	Property<MaterialPtr> material;
 	Property<bool> shadowsEnabled;
+
+	Array<float,4> getLocalQuadVertexHeights(float x, float z) const;
+
+	float getLocalHeight(float x,float z) const;
 
 	void render(RenderQueue* rq) const;
 
@@ -35,17 +39,9 @@ private:
 	mutable BufferPtr m_indexBuffer;
 	mutable uint32_t m_indexCount{};
 
-	CTerrainUniforms& uniforms() const {
-		return *(CTerrainUniforms*)m_uniformBuffer->data();
-	}
-
-	TerrainUniforms& lockUniforms() const {
-		return *(TerrainUniforms*)m_uniformBuffer->lock();
-	}
-
-	void unlockUniforms() const {
-		m_uniformBuffer->unlock();
-	}
+	CTerrainUniforms& uniforms() const;
+	TerrainUniforms& lockUniforms() const;
+	void unlockUniforms() const;
 
 	void onValidate() const override;
 };

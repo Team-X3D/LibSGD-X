@@ -2,7 +2,7 @@
 
 void entry() {
 
-	setConfigVar("debug.gltfLoader","1");
+	setConfigVar("gltf.loggingEnabled","1");
 
 	float sz = 100;
 
@@ -16,14 +16,16 @@ void entry() {
 
 	MeshPtr meshes[3];
 	meshes[0] = loadStaticMesh(Path("sgd://models/tree1.glb")).result();
-	meshes[1] = loadStaticMesh(Path("sgd://models/palm_tree1.glb")).result();
+//	meshes[1] = loadStaticMesh(Path("sgd://models/palm_tree1.glb")).result();
+	meshes[1] = loadStaticMesh(Path("~/Desktop/palm_tree1.glb")).result();
 	meshes[2] = loadStaticMesh(Path("sgd://models/birch_tree1.glb")).result();
 
-	int n = 12500;
+	int n = 1250;
 	for (int i = 0; i < n; ++i) {
 		ModelPtr model = new Model(meshes[(int)rnd(3)]);
 		scene->add(model);
 		move(model, {rnd(-sz, sz), 0, rnd(-sz, sz)});
+		turn(model, {0,rnd(-180,180),0});
 	}
 
 	createPlayer(nullptr);

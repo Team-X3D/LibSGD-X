@@ -27,12 +27,29 @@ time0Step = .02
 CreateWindow GetDesktopWidth()/2,GetDesktopHeight()/2,"Animation Blender",WINDOW_FLAGS_CENTERED
 
 camera = CreatePerspectiveCamera()
-MoveEntity camera,0,1,-3
+TurnEntity camera,-45,0,0
+MoveEntity camera,0,0,-7.5
 
-light = CreateDirectionalLight()
-TurnEntity light,-35,0,0
+Local plane = CreatePlane(LoadMaterial("sgd://materials/Ground037_1K-JPG"))
 
-model = LoadBonedModel ("sgd://models/base_male_animated.glb",True)
+Local pmaterial = CreateEmissiveMaterial()
+SetMaterialColor pmaterial,"emissive",1,1,1,1
+Local pmesh = CreateSphereMesh(.05,8,4,pmaterial)
+Local pmodel = CreateModel(pmesh)
+
+light = CreateSpotLight()
+SetEntityParent pmodel,light
+MoveEntity light,0,2.5,0
+SetLightRange light,5
+
+TurnEntity light,-90,0,0
+
+Local outerAngle# = 45 
+Local innerAngle# = 0
+SetLightShadowsEnabled light,True
+
+model = LoadBonedModel("sgd://models/base_male_animated.glb",True)
+SetMeshShadowsEnabled GetModelMesh(model),True
 
 While Not (PollEvents() And EVENT_MASK_CLOSE_CLICKED)
 
@@ -97,8 +114,25 @@ While Not (PollEvents() And EVENT_MASK_CLOSE_CLICKED)
 		AnimateModel model,seq1,time1,2,blend
 	EndIf
 	
+	If IsKeyHit(KEY_2)
+		If outerAngle<90 outerAngle=outerAngle+3
+	Else If IsKeyHit(KEY_1)
+		If outerAngle>3 outerAngle=outerAngle-3
+		If outerAngle<innerAngle innerAngle=outerAngle
+	EndIf
+	SetLightOuterConeAngle light,outerAngle
+	
+	If IsKeyHit(KEY_4)
+		If innerAngle<outerAngle innerAngle=innerAngle+3
+	Else If IsKeyHit(KEY_3)
+		If innerAngle>0 innerAngle=innerAngle-3
+	EndIf		
+	SetLightInnerConeAngle light,innerAngle
+	
 	Clear2D()
 	Draw2DText "Arrow keys/Shift to run. Using blend:"+useBlend+" (space to toggle)",0,0
+	Draw2DText "Outer cone angle: "+outerAngle+" (1/2)",0,16
+	Draw2DText "Inner cone angle: "+innerAngle+" (3/4)",0,32
 	
 	RenderScene()
 	

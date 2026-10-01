@@ -36,10 +36,15 @@ bool g_robustnessEnabled = true;
 auto init1 =
 	configVarChanged("dawn.robustnessEnabled").connect(nullptr, [](CString value) { g_robustnessEnabled = truthiness(value); });
 
+String wgpuStringViewToString(const wgpu::StringView& sv) {
+	if(!sv.IsUndefined()) return String(sv);
+	return "???";
+};
+
 Vector<const char*> g_enabledToggles;
 Vector<wgpu::FeatureName> g_requiredFeatures;
 
-void dawnDeviceLostCallback(WGPUDevice const* device, WGPUDeviceLostReason reason, char const* message, void* userdata) {
+void dawnDeviceLostCallback(WGPUDevice const* device, WGPUDeviceLostReason reason, WGPUStringView message, void* userdata) {
 	static const char* names[] = {"Undefined", "Unknown", "Destroyed", "InstanceDropped", "FailedCreation"};
 
 	if (reason == WGPUDeviceLostReason_InstanceDropped) return;
@@ -48,21 +53,21 @@ void dawnDeviceLostCallback(WGPUDevice const* device, WGPUDeviceLostReason reaso
 
 	//	SGD_LOG << "Dawn device lost:" << rname;
 	//	SGD_LOG << message;
-	SGD_ERROR(String("Dawn device lost: ") + rname + "\n" + message);
+	SGD_ERROR(String("Dawn device lost: ") + rname + "\n" + wgpuStringViewToString(message));
 }
 
-void dawnErrorCallback(WGPUErrorType type, const char* message, void*) {
+void dawnErrorCallback(WGPUErrorType type, WGPUStringView message, void*) {
 	static const char* names[] = {"Undefined", "NoError", "Validation", "Out of memory", "Internal", "Unknown", "Device lost"};
 
 	auto tname = (uint32_t)type < std::size(names) ? names[(uint32_t)type] : "OOPS";
 
 	SGD_LOG << "Dawn device error message:" << tname;
-	SGD_LOG << message;
-	alert(String("Dawn Device error:\n") + tname + "\n" + message);
+	SGD_LOG << wgpuStringViewToString(message);
+	alert(String("Dawn Device error:\n") + tname + "\n" + wgpuStringViewToString(message));
 	SGD_ABORT();
 }
 
-void dawnLoggingCallback(WGPULoggingType type, const char* message, void*) {
+void dawnLoggingCallback(WGPULoggingType type, WGPUStringView message, void*) {
 	static const char* names[] = {"???", "Verbose", "Info", "Warning", "Error"};
 
 	auto tname = (uint32_t)type < std::size(names) ? names[(uint32_t)type] : "OOPS";
@@ -70,18 +75,18 @@ void dawnLoggingCallback(WGPULoggingType type, const char* message, void*) {
 	switch (type) {
 	case WGPULoggingType_Verbose:
 #if SGD_CONFIG_DEBUG
-		SGD_LOG << "Dawn:" << message;
+		SGD_LOG << "Dawn:" << wgpuStringViewToString(message);
 #endif
 		break;
 	case WGPULoggingType_Info:
-		SGD_LOG << "Dawn info:" << message;
+		SGD_LOG << "Dawn info:" << wgpuStringViewToString(message);
 		break;
 	case WGPULoggingType_Warning:
-		SGD_LOG << "Dawn warning:" << message;
+		SGD_LOG << "Dawn warning:" << wgpuStringViewToString(message);
 		break;
 	case WGPULoggingType_Error:
-		SGD_LOG << "Dawn error:" << message;
-		alert(String("Dawn error: ") + message);
+		SGD_LOG << "Dawn error:" << wgpuStringViewToString(message);
+		alert(String("Dawn error: ") + wgpuStringViewToString(message));
 		SGD_ABORT();
 		break;
 	default:
@@ -97,10 +102,10 @@ void logAdapterProps(const wgpu::Adapter& adapter) {
 
 	adapter.GetInfo(&info);
 	SGD_LOG << "Dawn WGPU adapter Info:";
-	SGD_LOG << "Vender name:" << (info.vendor ? info.vendor : "???");
-	SGD_LOG << "Architecture:" << (info.architecture ? info.architecture : "???");
-	SGD_LOG << "Name:" << (info.device ? info.device : "???");
-	SGD_LOG << "Driver description:" << (info.description ? info.description : "???");
+	SGD_LOG << "Vender name:" << wgpuStringViewToString(info.vendor);
+	SGD_LOG << "Architecture:" << wgpuStringViewToString(info.architecture);
+	SGD_LOG << "Name:" << wgpuStringViewToString(info.device);
+	SGD_LOG << "Driver description:" << wgpuStringViewToString(info.description);
 	Map<wgpu::AdapterType, String> adapterTypes{
 		{wgpu::AdapterType::DiscreteGPU, "DiscreteGPU"},
 		{wgpu::AdapterType::IntegratedGPU, "IntegratedGPU"},

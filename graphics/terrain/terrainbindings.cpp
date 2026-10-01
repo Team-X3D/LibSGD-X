@@ -1,7 +1,7 @@
 #include "terrainbindings.h"
 
 #include "../core/textureutil.h"
-#include "../material/prelitmaterial.h"
+#include "../material/emissivematerial.h"
 #include "../render/renderqueue.h"
 
 namespace sgd {
@@ -51,7 +51,7 @@ TerrainBindings::TerrainBindings()
 	});
 	worldMatrix.update();
 
-	size.changed.connect(nullptr, [=](uint32_t n){
+	size.changed.connect(nullptr, [=](uint32_t n) {
 		lockUniforms().size = (float)n;
 		unlockUniforms();
 		invalidate();
@@ -66,7 +66,7 @@ TerrainBindings::TerrainBindings()
 	});
 	lods.update();
 
-	materialSize.changed.connect(nullptr, [=](uint32_t n) {
+	materialSize.changed.connect(nullptr, [=](float n) {
 		lockUniforms().materialTexelSize = 1.0f / (float)n;
 		unlockUniforms();
 		invalidate();
@@ -75,9 +75,9 @@ TerrainBindings::TerrainBindings()
 
 	heightTexture.changed.connect(nullptr, [=](CTexture* ttexture) { //
 		auto size = ttexture->size().x;
-		if(size!=ttexture->size().y) SGD_ERROR("Terrain height texture must be square");
-		if(size & (size - 1)) SGD_ERROR("Terrain height texture size must be a power of 2");
-//		if(size<512) SGD_ERROR("Terrain height texture size must be at least 512");
+		if (size != ttexture->size().y) SGD_ERROR("Terrain height texture must be square");
+		if (size & (size - 1)) SGD_ERROR("Terrain height texture size must be a power of 2");
+		//		if(size<512) SGD_ERROR("Terrain height texture size must be at least 512");
 		lockUniforms().heightTexelSize = 1.0f / (float)size;
 		unlockUniforms();
 		m_bindGroup->setTexture(1, ttexture);
@@ -95,7 +95,19 @@ TerrainBindings::TerrainBindings()
 	});
 	debugMode.changed.emit(debugMode());
 
-	material = new Material(&prelitMaterialDescriptor);
+	material = new Material(&emissiveMaterialDescriptor);
+}
+
+CTerrainUniforms& TerrainBindings::uniforms() const {
+	return *(CTerrainUniforms*)m_uniformBuffer->data();
+}
+
+TerrainUniforms& TerrainBindings::lockUniforms() const {
+	return *(TerrainUniforms*)m_uniformBuffer->lock();
+}
+
+void TerrainBindings::unlockUniforms() const {
+	m_uniformBuffer->unlock();
 }
 
 void TerrainBindings::onValidate() const {
@@ -134,6 +146,8 @@ void TerrainBindings::onValidate() const {
 
 						static constexpr uint32_t tris[]{
 							// clang-format off
+//							0,3,1,  3,4,1,  1,4,5,  1,5,2,
+//							3,6,7,  3,7,4,  4,7,5,  7,8,5,
 							0,9,1,  1,9,4,  4,9,3,  3,9,0,
 							1,10,2, 2,10,5, 5,10,4, 4,10,1,
 							3,11,4, 4,11,7, 7,11,6, 6,11,3,
@@ -173,6 +187,50 @@ void TerrainBindings::onValidate() const {
 	m_indexBuffer = new Buffer(BufferType::index, indices.data(), sizeof(uint32_t) * indices.size());
 
 	m_indexCount = indices.size();
+}
+
+Array<float, 4> TerrainBindings::getLocalQuadVertexHeights(float x, float z) const {
+
+	auto fx = std::floor(x);
+	auto fz = std::floor(z);
+
+	float hsize = (float)size() / 2;
+	if (fx < -hsize || fx >= hsize - 1 || fz < -hsize || fz >= hsize - 1) {
+		return {}; // Off the map
+	}
+	auto ix = (uint32_t)(fx + hsize);
+	auto iz = (uint32_t)(fz + hsize);
+	auto data = heightTexture()->data();
+
+	switch (data->format()) {
+	case TextureFormat::r32f: {
+		auto p0 = (float*)(data->data() + iz * data->pitch());
+		auto p1 = (float*)(data->data() + (iz + 1u) * data->pitch());
+		return {p0[ix], p0[ix + 1], p1[ix], p1[ix + 1]};
+	}
+	case TextureFormat::r16f: {
+		auto p0 = (float16*)(data->data() + iz * data->pitch());
+		auto p1 = (float16*)(data->data() + (iz + 1u) * data->pitch());
+		return {(float)p0[ix], (float)p0[ix + 1], (float)p1[ix], (float)p1[ix + 1]};
+	}
+	default:
+		SGD_ERROR("TODO");
+	}
+}
+
+float TerrainBindings::getLocalHeight(float x, float z) const {
+
+	auto ys = getLocalQuadVertexHeights(x,z);
+
+	auto tx = x - std::floor(x);
+	auto tz = z - std::floor(z);
+
+	float y4 = (ys[1] - ys[0]) * tx + ys[0];
+	float y5 = (ys[3] - ys[2]) * tx + ys[2];
+
+	float y = (y5 - y4) * tz + y4;
+
+	return y;
 }
 
 void TerrainBindings::render(RenderQueue* rq) const {

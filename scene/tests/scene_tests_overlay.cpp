@@ -32,7 +32,7 @@ void entry() {
 
 	dc->pushLayer();
 
-	MaterialPtr mat = loadPrelitMaterial(Path("sgd://misc/StillLife.exr")).result();
+	MaterialPtr mat = loadEmissiveMaterial(Path("sgd://misc/StillLife.exr")).result();
 	mat->blendMode = BlendMode::alphaBlend;
 
 	dc->fillColor = {1.0, 0.75f, 0, 1};

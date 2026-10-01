@@ -1,5 +1,7 @@
+.. _Sprites:
+
 Sprites
-======
+=======
 
 Sprites...
 

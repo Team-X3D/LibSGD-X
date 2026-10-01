@@ -21,7 +21,11 @@
 #include "physics/intersect.h"
 #include "physics/meshcollider.h"
 #include "physics/meshcolliderdata.h"
+#include "physics/planecollider.h"
 #include "physics/spherecollider.h"
+#include "physics/terraincollider.h"
+
+#include "plane/planeentity.h"
 
 #include "rendereffect/bloomeffect.h"
 #include "rendereffect/blureffect.h"

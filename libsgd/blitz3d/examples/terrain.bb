@@ -43,12 +43,18 @@ MoveEntity player,0,512,-1024
 SetCameraNear camera,.2
 SetCameraFar camera,2000
 
+CreateTerrainCollider terrain,0
+CreateSphereCollider player,1,1
+
+EnableCollisions 1,0,COLLISION_RESPONSE_SLIDE
+
 Local debug=0
 
 While (PollEvents() And 1)<>1
 
-;	PlayerFly2(.75,1.25,.25)
 	PlayerFly2(.25,.5,.125)
+	
+	UpdateColliders()
 	
 	If IsKeyHit(KEY_SPACE)
 		debug=1-debug

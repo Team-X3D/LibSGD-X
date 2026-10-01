@@ -1,6 +1,6 @@
 #include "drawlist.h"
 
-#include "../material/prelitmaterial.h"
+#include "../material/emissivematerial.h"
 #include "../render/renderqueue.h"
 
 namespace sgd {
@@ -49,7 +49,7 @@ DrawList::DrawList()
 
 	m_bindGroup->setBuffer(0, m_uniformBuffer);
 
-	auto cmaterial = new Material(&prelitMaterialDescriptor);
+	auto cmaterial = new Material(&emissiveMaterialDescriptor);
 	cmaterial->blendMode = BlendMode::alphaBlend;
 	//	cmaterial->depthFunc = DepthFunc::always;
 	cmaterial->cullMode = CullMode::none;

@@ -69,8 +69,8 @@ void createInstance() {
 	assert(wgpuInstance);
 }
 
-void deviceErrorCallback(WGPUErrorType type, const char* message,void*) {
-	printf("### Dawn error: %s\n",message);
+void deviceErrorCallback(WGPUErrorType type, WGPUStringView message, void*) {
+	printf("### Dawn error\n");
 	fflush(stdout);
 	std::exit(1);
 };

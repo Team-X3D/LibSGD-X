@@ -6,9 +6,9 @@
 //! @cond
 
 #define SGD_VERSION_MAJOR 0
-#define SGD_VERSION_MINOR 16
+#define SGD_VERSION_MINOR 18
 #define SGD_VERSION_PATCH 0
-#define SGD_VERSION "0.16.0" // How to macro-ize this?
+#define SGD_VERSION "0.18.0" // C/C++ hackers, how can I macro-ize this?
 
 #if defined(SWIG) || defined(SGD_GENAPI)
 
@@ -365,7 +365,7 @@ typedef enum SGD_TextureFormat {
 //!
 //! By default, texture coordinates wrap at the edges of textures.
 //!
-//! Textures are always linear filtered whe minimized.
+//! Textures are always linear filtered when minimized.
 typedef enum SGD_TextureFlags {
 	SGD_TEXTURE_FLAGS_NONE = 0x0,	  //!< No texture flags.
 	SGD_TEXTURE_FLAGS_CLAMP_U = 0x01, //!< Clamp texture U coordinates.
@@ -437,14 +437,14 @@ SGD_API int SGD_DECL sgd_GetTexelSRGBA(SGD_Texture texture, int x, int y);
 //! Material handle type.
 typedef SGD_Handle SGD_Material;
 
-//! Blend mode.
+//! Material blend modes, for use with @ref sgd_SetMaterialBlendMode.
 typedef enum SGD_BlendMode {
 	SGD_BLEND_MODE_OPAQUE = 1,
 	SGD_BLEND_MODE_ALPHA_MASK = 2,
 	SGD_BLEND_MODE_ALPHA_BLEND = 3,
 } SGD_BlendMode;
 
-//! Depth Comparison function.
+//! Material depth comparison functions, for use with @ref sgd_SetMaterialDepthFunc.
 typedef enum SGD_DepthFunc {
 	SGD_DEPTH_FUNC_NEVER = 1,
 	SGD_DEPTH_FUNC_LESS = 2,
@@ -456,7 +456,7 @@ typedef enum SGD_DepthFunc {
 	SGD_DEPTH_FUNC_ALWAYS = 8,
 } SGD_DepthFunc;
 
-//! Cull modes.
+//! Material cull modes, for use with @ref sgd_SetMaterialCullMode.
 typedef enum SGD_CullMode {
 	SGD_CULL_MODE_NONE = 1,
 	SGD_CULL_MODE_FRONT = 2,
@@ -468,17 +468,20 @@ typedef enum SGD_CullMode {
 //! @defgroup Material Material
 //! @{
 
-//! Load a new PBR material.
-SGD_API SGD_Material SGD_DECL sgd_LoadPBRMaterial(SGD_String path);
+//! Load a new material from an '.sgd' material file.
+SGD_API SGD_Material SGD_DECL sgd_LoadMaterial(SGD_String path);
 
 //! Create a new PBR material.
 SGD_API SGD_Material SGD_DECL sgd_CreatePBRMaterial();
 
-//! Load a new prelit material.
-SGD_API SGD_Material SGD_DECL sgd_LoadPrelitMaterial(SGD_String path);
+//! Load a new PBR material from an image file.
+SGD_API SGD_Material SGD_DECL sgd_LoadPBRMaterial(SGD_String path);
 
-//! Create a new prelit material.
-SGD_API SGD_Material SGD_DECL sgd_CreatePrelitMaterial();
+//! Create a new emissive material.
+SGD_API SGD_Material SGD_DECL sgd_CreateEmissiveMaterial();
+
+//! Load a new emissive material from an image file.
+SGD_API SGD_Material SGD_DECL sgd_LoadEmissiveMaterial(SGD_String path);
 
 //! Set material blend mode.
 SGD_API void SGD_DECL sgd_SetMaterialBlendMode(SGD_Material material, SGD_BlendMode blendMode);
@@ -489,15 +492,26 @@ SGD_API void SGD_DECL sgd_SetMaterialDepthFunc(SGD_Material material, SGD_DepthF
 //! Set material cull mode.
 SGD_API void SGD_DECL sgd_SetMaterialCullMode(SGD_Material material, SGD_CullMode cullMode);
 
-//! Set material texture parameter.
-SGD_API void SGD_DECL sgd_SetMaterialTexture(SGD_Material material, SGD_String parameter, SGD_Texture texture);
+//! Set material texture property.
+SGD_API void SGD_DECL sgd_SetMaterialTexture(SGD_Material material, SGD_String property, SGD_Texture texture);
 
-//! Set material color parameter.
-SGD_API void SGD_DECL sgd_SetMaterialColor(SGD_Material material, SGD_String parameter, float red, float green, float blue,
+//! Set material color property.
+//!
+//! The color components should be in non-linear color space, and should not be premultiplied by alpha.
+SGD_API void SGD_DECL sgd_SetMaterialColor(SGD_Material material, SGD_String property, float red, float green, float blue,
 										   float alpha);
 
-//! Set material float parameter.
-SGD_API void SGD_DECL sgd_SetMaterialFloat(SGD_Material material, SGD_String parameter, float value);
+//! Set material vec4f property.
+SGD_API void SGD_DECL sgd_SetMaterialVec4f(SGD_Material material, SGD_String property, float x, float y, float z, float w);
+
+//! Set material vec3f property.
+SGD_API void SGD_DECL sgd_SetMaterialVec3f(SGD_Material material, SGD_String property, float x, float y, float z);
+
+//! Set material vec2f property.
+SGD_API void SGD_DECL sgd_SetMaterialVec2f(SGD_Material material, SGD_String property, float x, float y);
+
+//! Set material float property.
+SGD_API void SGD_DECL sgd_SetMaterialFloat(SGD_Material material, SGD_String property, float value);
 
 //! @}
 
@@ -945,8 +959,9 @@ SGD_API int SGD_DECL sgd_GetEntityChildCount(SGD_Entity entity);
 //! Get entity child by index. childIndex must be >= 0 and < sgd_GetEntityChildCount(entity)
 SGD_API SGD_Entity SGD_DECL sgd_GetEntityChild(SGD_Entity entity, int childIndex);
 
-//! Recursively search for an entity by name.
+//! Recursively search for an entity by name. If parent is 0, the entire scene is searched.
 SGD_API SGD_Entity SGD_DECL sgd_FindEntityChild(SGD_Entity entity, SGD_String childName);
+
 
 //! Set entity's world space position.
 SGD_API void SGD_DECL sgd_SetEntityPosition(SGD_Entity entity, SGD_Real tx, SGD_Real ty, SGD_Real tz);
@@ -1246,6 +1261,28 @@ SGD_API void SGD_DECL sgd_SetSkyboxRoughness(SGD_Skybox skybox, float roughness)
 
 //! @}
 
+//! @defgroup PlaneTypes PlaneTypes
+//! @{
+
+//! Plane handle type.
+typedef SGD_Entity SGD_Plane;
+
+//@}
+
+//! @defgroup Plane Plane
+//! @{
+
+//! Create a new Plane entity.
+SGD_API SGD_Plane SGD_DECL sgd_CreatePlane(SGD_Material material);
+
+//! Set plane material.
+SGD_API void SGD_DECL sgd_SetPlaneMaterial(SGD_Plane plane, SGD_Material material);
+
+//! Get plane material.
+SGD_API SGD_Material SGD_DECL sgd_GetPlaneMaterial(SGD_Plane plane);
+
+//! @}
+
 //! @defgroup TerrainTypes TerrainTypes
 //! @{
 
@@ -1270,7 +1307,7 @@ SGD_API void SGD_DECL sgd_SetTerrainLODs(SGD_Terrain terrain, int lods);
 SGD_API void SGD_DECL sgd_SetTerrainMaterial(SGD_Terrain terrain, SGD_Material material);
 
 //! Set terrain material size.
-SGD_API void SGD_DECL sgd_SetTerrainMaterialSize(SGD_Terrain terrain, int materialSize);
+SGD_API void SGD_DECL sgd_SetTerrainMaterialSize(SGD_Terrain terrain, float materialSize);
 
 //! Set terrain height texture.
 SGD_API void SGD_DECL sgd_SetTerrainHeightTexture(SGD_Terrain terrain, SGD_Texture texture);
@@ -1280,6 +1317,9 @@ SGD_API void SGD_DECL sgd_SetTerrainNormalTexture(SGD_Terrain terrain, SGD_Textu
 
 //! Set terrain debug mode.
 SGD_API void SGD_DECL sgd_SetTerrainDebugMode(SGD_Terrain terrain, int debugMode);
+
+//! Get terrain height at world x/z coordinates.
+SGD_API SGD_Real SGD_DECL sgd_GetTerrainHeight(SGD_Terrain terrain, SGD_Real x, SGD_Real z);
 
 //! @}
 
@@ -1334,7 +1374,17 @@ SGD_API SGD_Collider SGD_DECL sgd_CreateSphereCollider(SGD_Entity entity, int co
 SGD_API SGD_Collider SGD_DECL sgd_CreateEllipsoidCollider(SGD_Entity entity, int colliderType, float radius, float height);
 
 //! Create a new mesh collider and attach it to entity.
+//!
+//! If mesh is 0, entity must a Model entity, and is used to provide the collision mesh.
 SGD_API SGD_Collider SGD_DECL sgd_CreateMeshCollider(SGD_Entity entity, int colliderType, SGD_Mesh mesh);
+
+//! Create a new terrain collider and attach it to entity.
+//!
+//! The entity must be a terrain entity.
+SGD_API SGD_Collider SGD_DECL sgd_CreateTerrainCollider(SGD_Entity terrain,int colliderType);
+
+//! Create a new plane collider and attach it to entity.
+SGD_API SGD_Collider SGD_DECL sgd_CreatePlaneCollider(SGD_Entity entity, int colliderType);
 
 //! Return entity a collider is attached to.
 SGD_API SGD_Entity SGD_DECL sgd_GetColliderEntity(SGD_Collider collider);

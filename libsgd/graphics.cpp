@@ -86,6 +86,13 @@ int SGD_DECL sgd_GetTexelSRGBA(SGD_Texture htexture, int x, int y) {
 
 // ***** Material *****
 
+SGD_Material SGD_DECL sgd_LoadMaterial(SGD_String path) {
+	sgdx::started();
+	auto material = sgd::loadMaterial(sgd::Path(path));
+	if(!material) sgdx::error("Failed to load material", material.error());
+	return sgdx::createHandle(material.result());
+}
+
 SGD_Material SGD_DECL sgd_CreatePBRMaterial() {
 	sgdx::started();
 	auto material = sgd::createPBRMaterial();
@@ -99,15 +106,15 @@ SGD_Material SGD_DECL sgd_LoadPBRMaterial(SGD_String path) {
 	return sgdx::createHandle(material.result());
 }
 
-SGD_Material SGD_DECL sgd_CreatePrelitMaterial() {
+SGD_Material SGD_DECL sgd_CreateEmissiveMaterial() {
 	sgdx::started();
-	auto material = sgd::createPrelitMaterial();
+	auto material = sgd::createEmissiveMaterial();
 	return sgdx::createHandle(material);
 }
 
-SGD_Material SGD_DECL sgd_LoadPrelitMaterial(SGD_String path) {
+SGD_Material SGD_DECL sgd_LoadEmissiveMaterial(SGD_String path) {
 	sgdx::started();
-	auto material = sgd::loadPrelitMaterial(sgd::Path(path));
+	auto material = sgd::loadEmissiveMaterial(sgd::Path(path));
 	if (!material) sgdx::error("Failed to load material", material.error());
 	return sgdx::createHandle(material.result());
 }
@@ -124,17 +131,29 @@ void SGD_DECL sgd_SetMaterialCullMode(SGD_Material hmaterial, SGD_CullMode cullM
 	sgdx::resolveHandle<sgd::Material>(hmaterial)->cullMode = (sgd::CullMode)cullMode;
 }
 
-void SGD_DECL sgd_SetMaterialTexture(SGD_Material hmaterial, SGD_String parameter, SGD_Texture htexture) {
-	sgdx::resolveHandle<sgd::Material>(hmaterial)->setTexture(parameter, sgdx::resolveHandle<sgd::Texture>(htexture));
+void SGD_DECL sgd_SetMaterialTexture(SGD_Material hmaterial, SGD_String property, SGD_Texture htexture) {
+	sgdx::resolveHandle<sgd::Material>(hmaterial)->setTexture(property, sgdx::resolveHandle<sgd::Texture>(htexture));
 }
 
-void SGD_DECL sgd_SetMaterialColor(SGD_Material hmaterial, SGD_String parameter, float red, float green, float blue,
+void SGD_DECL sgd_SetMaterialColor(SGD_Material hmaterial, SGD_String property, float red, float green, float blue,
 								   float alpha) {
-	sgdx::resolveHandle<sgd::Material>(hmaterial)->setColor(parameter, {red, green, blue, alpha});
+	sgdx::resolveHandle<sgd::Material>(hmaterial)->setColor(property, {red, green, blue, alpha});
 }
 
-void SGD_DECL sgd_SetMaterialFloat(SGD_Material hmaterial, SGD_String parameter, float value) {
-	sgdx::resolveHandle<sgd::Material>(hmaterial)->setFloat(parameter, value);
+void SGD_DECL sgd_SetMaterialVec4f(SGD_Material hmaterial, SGD_String property, float x, float y, float z, float w) {
+	sgdx::resolveHandle<sgd::Material>(hmaterial)->setVec4f(property, {x,y,z,w});
+}
+
+void SGD_DECL sgd_SetMaterialVec3f(SGD_Material hmaterial, SGD_String property, float x, float y, float z) {
+	sgdx::resolveHandle<sgd::Material>(hmaterial)->setVec3f(property, {x,y,z});
+}
+
+void SGD_DECL sgd_SetMaterialVec2f(SGD_Material hmaterial, SGD_String property, float x, float y) {
+	sgdx::resolveHandle<sgd::Material>(hmaterial)->setVec2f(property, {x,y});
+}
+
+void SGD_DECL sgd_SetMaterialFloat(SGD_Material hmaterial, SGD_String property, float value) {
+	sgdx::resolveHandle<sgd::Material>(hmaterial)->setFloat(property, value);
 }
 
 // ***** Mesh *****

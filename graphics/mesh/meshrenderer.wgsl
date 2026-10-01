@@ -49,7 +49,7 @@ struct Varying {
         out.tanMatrix0 = normalMatrix * vertex.tangent.xyz;
         out.tanMatrix1 = cross(out.tanMatrix0, out.tanMatrix2) * vertex.tangent.w;
     } else {
-    	out.tanMatrix2 = normalMatrix * vertex.normal;
+       	out.tanMatrix2 = normalMatrix * vertex.normal;
     }
 	out.texCoords = vertex.texCoords;
 	out.color = instance.color * vertex.color;
@@ -57,16 +57,20 @@ struct Varying {
 	return out;
 }
 
-@fragment fn fragmentMain(in: Varying) -> @location(0) vec4f {
+@fragment fn fragmentMain(in: Varying, @builtin(front_facing) frontFacing: bool) -> @location(0) vec4f {
 #if !RENDER_PASS_SHADOW
 
     var tanMatrix: mat3x3f;
 
     if geometry_uniforms.tangentsEnabled != 0 {
         tanMatrix = mat3x3f(normalize(in.tanMatrix0), normalize(in.tanMatrix1), normalize(in.tanMatrix2));
-    }else{
+    } else {
         tanMatrix[2] = in.tanMatrix2;
     }
+
+#if !CULL_MODE_BACK
+    if !frontFacing {tanMatrix[2] = -tanMatrix[2];}
+#endif
 
     return evaluateMaterial(in.position, tanMatrix, in.texCoords, in.color);
 

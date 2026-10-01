@@ -47,8 +47,17 @@ add_library(scene
 	physics/meshcollider.h
 	physics/meshcolliderdata.cpp
 	physics/meshcolliderdata.h
+	physics/planecollider.cpp
+	physics/planecollider.h
 	physics/spherecollider.cpp
 	physics/spherecollider.h
+	physics/terraincollider.cpp
+	physics/terraincollider.h
+
+	plane/planeentity.cpp
+	plane/planeentity.h
+	plane/planerenderer.cpp
+	plane/planerenderer.h
 
 	rendereffect/bloomeffect.cpp
 	rendereffect/bloomeffect.h

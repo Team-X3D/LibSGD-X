@@ -106,6 +106,7 @@ wgpu::RenderPipeline getOrCreateRenderPipeline(RenderPassType rpassType,
 #endif
 		header += "#define RENDER_PASS_" + toString(rpassType) + " 1\n";
 		header += "#define BLEND_MODE_" + toString(blendMode) + " 1\n";
+		header += "#define CULL_MODE_" + toString(cullMode) + " 1\n";
 
 		tcpp::Lexer lexer(std::make_unique<tcpp::StringInputStream>(header + source));
 		tcpp::Preprocessor preprocessor(lexer, {errorCallback});

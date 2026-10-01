@@ -51,12 +51,12 @@ const lods = array<vec2f, 65>(
 	vec2f(6.0, 0.0)
 );
 
-const offs = array<vec4f, 13>(
+const offs = array<vec4f, 9>(
 	vec4f(0.0),  vec4f(-1.0,0.0, 1.0,0.0), vec4f(0.0),
 	vec4f(0.0,-1.0, 0.0,1.0), vec4f(0.0), vec4f(0.0,-1.0, 0.0,1.0),
 	vec4f(0.0), vec4f(-1.0,0.0, 1.0,0.0), vec4f(0.0),
-	vec4f(-.5,.5, .5,-.5), vec4f(-.5,-.5, .5,.5),
-	vec4f(-.5,-.5, .5,.5), vec4f(-.5,.5, .5,-.5)
+//	vec4f(-.5,.5, .5,-.5), vec4f(-.5,-.5, .5,.5),
+//	vec4f(-.5,-.5, .5,.5), vec4f(-.5,.5, .5,-.5)
 );
 
 @vertex fn vertexMain(vertex: Vertex, @builtin(vertex_index) vertexId: u32) -> Varying {

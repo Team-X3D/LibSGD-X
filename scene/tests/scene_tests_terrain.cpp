@@ -38,6 +38,23 @@ void entry() {
 
 	setScale(terrain, {1, 512, 1});
 
+	MeshPtr meshes[3];
+	meshes[0] = loadStaticMesh(Path("sgd://models/tree1.glb")).result();
+	meshes[1] = loadStaticMesh(Path("sgd://models/palm_tree1.glb")).result();
+	meshes[2] = loadStaticMesh(Path("sgd://models/birch_tree1.glb")).result();
+
+	const int NUM_TREES = 250;
+	for (int i = 0; i < NUM_TREES; ++i) {
+		ModelPtr model = new Model(meshes[(int)rnd(3)]);
+		scene->add(model);
+
+		auto x = rnd(-2048, 2048);
+		auto z = rnd(-2048, 2048);
+		auto y = terrain->getHeight(x, z);
+
+		move(model, {x, y, z});
+	}
+
 	createPlayer(nullptr);
 	move(player, {0, 512, -768});
 
@@ -55,6 +72,11 @@ void entry() {
 
 	DrawListPtr dc = overlay->drawList();
 
+	TerrainColliderPtr terrainCollider = new TerrainCollider(terrain, 0, terrain->bindings());
+	SphereColliderPtr sphereCollider = new SphereCollider(player, 1, 1);
+
+	scene->collisionSpace()->enableCollisions(1, 0, CollisionResponse::slide);
+
 	for (;;) {
 		pollEvents();
 
@@ -66,6 +88,8 @@ void entry() {
 		if (window->keyboard()->key(KeyCode::LEFT_SHIFT).down()) speed = 2.5f;
 
 		playerFly(speed);
+
+		scene->collisionSpace()->updateColliders();
 
 		dc->clear();
 		dc->addText(String("Camera: ") + toString(camera->worldPosition()), {0, 0});

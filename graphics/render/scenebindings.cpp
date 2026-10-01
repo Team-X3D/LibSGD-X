@@ -309,6 +309,8 @@ void SceneBindings::addSSMPasses() const {
 
 		((Buffer*)pass->sceneBindings->getBuffer(cameraUniformsBinding))->update(&uniforms, 0, sizeof(uniforms));
 
+		ssmMatrices.push_back(uniforms.viewProjectionMatrix);
+
 		m_shadowPasses.push_back(*pass++);
 	}
 	((Buffer*)m_bindGroup->getBuffer(ssmMatricesBinding))->update(ssmMatrices.data(), 0, ssmMatrices.size() * sizeof(Mat4f));

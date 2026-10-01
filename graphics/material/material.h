@@ -10,12 +10,15 @@ SGD_SHARED(Material);
 struct MaterialDescriptor {
 	struct UniformDesc {
 		size_t offset;
-		size_t type;	// n floats for now
+		size_t type;	// n floats for now, 0x104=color, 4=vec4f, 3=vec3f, 2=vec2f, 1=float
 		void* defValue;
 	};
 	struct TextureDesc {
 		uint32_t binding;
-		const Texture* defValue;
+		const TextureType defType = TextureType::e2d;
+		const TextureFormat defFormat = TextureFormat::any;
+		const TextureFlags defFlags = TextureFlags::default_;
+		const uint32_t defRGBAColor = 0xffffff;
 	};
 	String const typeName;
 	const BindGroupDescriptor* bindGroupDescriptor;
@@ -30,6 +33,8 @@ struct MaterialDescriptor {
 					   Map<String, UniformDesc> uniformDescs,			   //
 					   Map<String, TextureDesc> textureDescs,
 					   uint32_t mainTexture);
+
+	static const MaterialDescriptor* forTypeName(CString typeName);
 };
 using CMaterialDescriptor = const MaterialDescriptor;
 
@@ -38,14 +43,16 @@ struct Material : GraphicsResource {
 
 	explicit Material(const MaterialDescriptor* desc);
 
+	Property<Path> path;
+
 	Property<BlendMode> blendMode{BlendMode::opaque};
 
 	Property<DepthFunc> depthFunc{DepthFunc::lessEqual};
 
 	Property<CullMode> cullMode{CullMode::back};
 
-	CTexture* mainTexture() const {
-		return m_desc->mainTexture ? m_bindGroup->getTexture(m_desc->mainTexture) : nullptr;
+	CMaterialDescriptor* descriptor() const {
+		return m_desc;
 	}
 
 	bool hasNormalTexture() const {
@@ -53,7 +60,13 @@ struct Material : GraphicsResource {
 	}
 
 	void setTexture(CString name, CTexture* texture);
+
 	void setColor(CString name, CVec4f color);
+
+	void setVec4f(CString name, CVec4f value);
+	void setVec3f(CString name, CVec3f value);
+	void setVec2f(CString name, CVec2f value);
+
 	void setFloat(CString name, float value);
 
 	wgpu::BindGroup wgpuBindGroup() const {
@@ -65,7 +78,7 @@ struct Material : GraphicsResource {
 	}
 
 protected:
-	const MaterialDescriptor* m_desc;
+	CMaterialDescriptor* m_desc{};
 	BindGroupPtr m_bindGroup;
 	BufferPtr m_uniformBuffer;
 	bool m_hasNormalTexture{};

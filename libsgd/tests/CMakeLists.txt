@@ -20,3 +20,6 @@ add(libsgd_tests_fogbug)
 
 add_executable(libsgd_tests_imgui libsgd_tests_imgui.cpp)
 target_link_libraries(libsgd_tests_imgui imgui-core libsgd_dynamic)
+
+add_executable(libsgd_bug libsgd_bug.cpp)
+target_link_libraries(libsgd_bug libsgd)

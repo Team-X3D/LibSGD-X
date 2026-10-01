@@ -18,17 +18,19 @@
 #include "image/imagerenderer.h"
 #include "image/imageutil.h"
     
+#include "material/emissivematerial.h"
 #include "material/material.h"
 #include "material/materialutil.h"
 #include "material/nullmaterial.h"
 #include "material/pbrmaterial.h"
-#include "material/prelitmaterial.h"
-    
+
 #include "mesh/mesh.h"
 #include "mesh/meshprimitives.h"
 #include "mesh/meshrenderer.h"
 #include "mesh/meshutil.h"
 #include "mesh/skinnedmeshrenderer.h"
+
+#include "plane/planebindings.h"
     
 #include "render/rendercontext.h"
 #include "render/renderpipeline.h"

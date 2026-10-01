@@ -42,7 +42,10 @@ add_library(graphics
 	image/imagerenderer.wgsl
 	image/imageutil.cpp
 	image/imageutil.h
-    
+
+	material/emissivematerial.cpp
+	material/emissivematerial.h
+	material/emissivematerial.wgsl
 	material/material.cpp
 	material/material.h
 	material/materialutil.cpp
@@ -53,10 +56,7 @@ add_library(graphics
 	material/pbrmaterial.cpp
 	material/pbrmaterial.h
 	material/pbrmaterial.wgsl
-	material/prelitmaterial.cpp
-	material/prelitmaterial.h
-	material/prelitmaterial.wgsl
-    
+
 	mesh/mesh.cpp
 	mesh/mesh.h
 	mesh/meshprimitives.cpp
@@ -73,6 +73,12 @@ add_library(graphics
 	mesh/surface.h
 	mesh/vertex.cpp
 	mesh/vertex.h
+
+	plane/planebindgroup.cpp
+	plane/planebindgroup.h
+	plane/planebindings.cpp
+	plane/planebindings.h
+	plane/planerenderer.wgsl
 
 	render/rendercontext.cpp
 	render/rendercontext.h

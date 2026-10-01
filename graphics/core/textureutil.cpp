@@ -374,7 +374,7 @@ Expected<Texture*, FileioEx> loadArrayTexture(CPath path, TextureFormat format, 
 	auto dstData = texture->lock();
 
 	auto dst = dstData->data();
-	auto bpr = size.x * dstData->bpp();
+	auto bpr = frameSize.x * dstData->bpp();
 
 	for (auto i = 0; i < frameCount; ++i) {
 		auto src = srcData->data() + orgs[i].y * srcData->pitch() + orgs[i].x * srcData->bpp();

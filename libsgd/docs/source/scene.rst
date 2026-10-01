@@ -11,9 +11,9 @@ The Scene rendering properties are:
 
 * Ambient Light Color - a color value used to represent the scene's diffuse ambient lighting. Use :any:`sgd_SetAmbientLightColor` to set this property.
 
-To render a scene, use the :any:`sgd_RenderScene function`.
+To render the scene, use :any:`sgd_RenderScene`.
 
-Once the scene has been rendered, use the :any:`sgd_Present` function to copy the render result to the app window.
+Once the scene has been rendered, use :any:`sgd_Present` to copy the render output to the app window.
 
 Example code
 ------------

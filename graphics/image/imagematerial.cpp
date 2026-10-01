@@ -34,8 +34,6 @@ BindGroupDescriptor bindGroupDescriptorMX( //
 	}, //
 	String("#define IMAGE_MATERIAL_MX 1\n") + shaderSource);
 
-TexturePtr g_defaultTextureMX = new Texture(TextureType::array, {1, 1}, 1, TextureFormat::r8, TextureFlags::clamp);
-
 } // namespace
 
 const MaterialDescriptor imageMaterialDescriptor( //
@@ -43,10 +41,10 @@ const MaterialDescriptor imageMaterialDescriptor( //
 	&bindGroupDescriptor,						  //
 	sizeof(ImageMaterialUniforms),				  //
 	{
-		{"albedo", {offsetof(ImageMaterialUniforms, albedoColor), 4, new Vec4f(1)}},
+		{"albedo", {offsetof(ImageMaterialUniforms, albedoColor), 0x104, new Vec4f(1)}},
 	},
 	{
-		{"albedo", {1, whiteTexture()}},
+		{"albedo", {1, TextureType::e2d, TextureFormat::any, TextureFlags::image}},
 
 	},
 	1); //
@@ -56,10 +54,10 @@ const MaterialDescriptor imageMaterialDescriptorMX( //
 	&bindGroupDescriptorMX,							//
 	sizeof(ImageMaterialUniforms),					//
 	{
-		{"albedo", {offsetof(ImageMaterialUniforms, albedoColor), 4, new Vec4f(1)}},
+		{"albedo", {offsetof(ImageMaterialUniforms, albedoColor), 0x104, new Vec4f(1)}},
 	},
 	{
-		{"albedo", {1, g_defaultTextureMX}},
+		{"albedo", {1, TextureType::array, TextureFormat::any, TextureFlags::image}},
 
 	},
 	1); //

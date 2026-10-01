@@ -16,17 +16,30 @@ int main() {
 
 void entry() {
 
-	ImagePtr image = loadImage(Path("sgd://misc/light.png")).result();
+	//	MaterialPtr material = loadMaterial(Path("~/Desktop/materials/Bricks076C_1K-JPG")).result();
+	//	MaterialPtr material = loadMaterial(Path("~/Desktop/materials/Fabric048_1K-JPG")).result();
+	//	MaterialPtr material = loadMaterial(Path("~/Desktop/materials/Fabric050_1K-JPG")).result();
+	//	MaterialPtr material = loadMaterial(Path("~/Desktop/materials/Gravel023_1K-JPG")).result();
+	//	MaterialPtr material = loadMaterial(Path("~/Desktop/materials/Ground037_1K-JPG")).result();
+	//	MaterialPtr material = loadMaterial(Path("~/Desktop/materials/PaintedWood009C_1K-JPG")).result();
+	MaterialPtr material = loadMaterial(Path("~/Desktop/materials/PavingStones065_1K-JPG")).result();
+	//	MaterialPtr material = loadMaterial(Path("~/Desktop/materials/PavingStones119_1K-JPG")).result();
+	//	MaterialPtr material = loadMaterial(Path("~/Desktop/materials/PavingStones131_1K-JPG")).result();
+	//	MaterialPtr material = loadMaterial(Path("~/Desktop/materials/Tiles019_1K-JPG")).result();
+	//	MaterialPtr material = loadMaterial(Path("~/Desktop/materials/Tiles093_1K-JPG")).result();
 
-	SpritePtr sprite = new Sprite(image);
-	scene->add(sprite);
+	material->setVec2f("textureScale", {.5f, .5f});
 
-	camera = new Camera(CameraType::perspective);
-	scene->add(camera);
+	PlaneEntityPtr planeEntity = new PlaneEntity(material);
+	scene->add(planeEntity);
 
-	move(camera,{0,0,-5});
+	createPlayer(nullptr);
+
+	move(player, {0, 10, -100});
 
 	for (;;) {
+
+		playerFly(.25f);
 
 		pollEvents();
 

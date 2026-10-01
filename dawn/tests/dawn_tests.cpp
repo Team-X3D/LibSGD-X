@@ -52,11 +52,15 @@ int main() {
 	surface = createWGPUSurface(device, window);
 
 	static auto configureSurface = [=](CVec2u size) {
+
+		wgpu::SurfaceCapabilities surfCaps{};
+		if (surface.GetCapabilities(device.GetAdapter(), &surfCaps) || !surfCaps.formatCount) std::abort();
+
 		wgpu::SurfaceConfiguration config{};
 		config.device = device;
 		config.width = width;
 		config.height = height;
-		config.format = surface.GetPreferredFormat(device.GetAdapter());
+		config.format = surfCaps.formats[0];
 		config.usage = wgpu::TextureUsage::RenderAttachment;
 		config.presentMode = wgpu::PresentMode::Fifo;
 		config.viewFormatCount = 0;

@@ -22,9 +22,7 @@ else ()
 
 	FetchContent_Declare(dawn
 		GIT_REPOSITORY https://github.com/blitz-research/dawn.git
-#		GIT_TAG openxr-dev
-#		GIT_TAG vsync-test
-		GIT_TAG vulkan-vsync-fix
+		GIT_TAG develop
 		GIT_SUBMODULES ""
 		GIT_SHALLOW TRUE
 		EXCLUDE_FROM_ALL

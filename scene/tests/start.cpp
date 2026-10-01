@@ -20,6 +20,10 @@ float player_rvy;
 CameraPtr camera;
 float camera_rx;
 
+void clear() {
+
+}
+
 void render() {
 	auto gc = currentGC();
 
@@ -51,7 +55,7 @@ void start(void (*entry)()) {
 
 	//auto envPath = "sgd://envmaps/stormy-cube.jpg";
 	auto envPath = "sgd://envmaps/sunnysky-cube.png";
-	auto envTexture = loadCubeTexture(Path(envPath), TextureFormat::any, TextureFlags::mipmap|TextureFlags::filter).result();
+	auto envTexture = loadCubeTexture(Path(envPath), TextureFormat::any, TextureFlags::default_).result();
 
 	scene->sceneRenderer()->envTexture = envTexture;
 	skybox = new Skybox(envTexture);
@@ -59,7 +63,8 @@ void start(void (*entry)()) {
 
 	light = new Light(LightType::directional);
 	scene->add(light);
-	turn(light, {-45, -45, 0});
+	turn(light, {-60, -45, 0});	// mostly down
+	//turn(light, {-90, 0, 0});	// straight down
 
 	overlay = new Overlay();
 	scene->add(overlay);
