@@ -242,7 +242,7 @@ Expected<TextureData*, FileioEx> loadTextureData(CData fileData, TextureFormat f
 		if (!img) return SGD_FILEIOEX("STB image error decoding hdr image data");
 		//
 		auto srcFormat = TextureFormat::rgba32f;
-		if (format == TextureFormat::any) floatFormat(channels);
+		format = floatFormat(channels);
 		//
 		data = new TextureData(size, srcFormat, img);
 		data->deleted.connect(nullptr, [=] { stbi_image_free(img); });
