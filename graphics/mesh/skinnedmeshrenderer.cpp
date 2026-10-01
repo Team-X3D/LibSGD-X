@@ -14,12 +14,12 @@ wgpu::VertexAttribute vertexAttribs[]{
 	{wgpu::VertexFormat::Float32x3, 0, 0},	// Vec3f position
 	{wgpu::VertexFormat::Float32x3, 12, 1}, // Vec3f normal
 	{wgpu::VertexFormat::Float32x4, 24, 2}, // Vec4f tangent
-	{wgpu::VertexFormat::Float32x3, 40, 3}, // Vec3f texCoords0
-	{wgpu::VertexFormat::Float32x4, 52, 4}, // Vec4f color
-	{wgpu::VertexFormat::Uint8x4, 68, 5},	// uint8_t joints[4]
-	{wgpu::VertexFormat::Float32x4, 72, 6}, // float weights[4];
+	{wgpu::VertexFormat::Float32x4, 40, 3}, // Vec4f texCoords xy=uv0, zw=uv1
+	{wgpu::VertexFormat::Float32x4, 56, 4}, // Vec4f color
+	{wgpu::VertexFormat::Uint8x4, 72, 5},	// uint8_t joints[4]
+	{wgpu::VertexFormat::Float32x4, 76, 6}, // float weights[4];
 };
-static_assert(sizeof(Vertex) == 88);
+static_assert(sizeof(Vertex) == 92);
 
 wgpu::VertexBufferLayout const vertexBufferLayout{sizeof(Vertex), wgpu::VertexStepMode::Vertex, std::size(vertexAttribs),
 												  vertexAttribs};

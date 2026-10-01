@@ -201,12 +201,13 @@ Material* GLTFLoader::loadMaterial(int id) {
 
 		auto& texInfo = pbr.baseColorTexture;
 		if (texInfo.index >= 0) {
-			if (texInfo.texCoord == 0) {
+			auto texCoord = texInfo.texCoord;
+			if (texCoord != 0 && (texCoord != 1 || !meshHasTexCoords1)) {
+				SGD_LOG << "TODO: Skipping baseColor texture with texInfo.texCoord" << texCoord;
+			} else {
 				if (g_loggingEnabled) SGD_LOG << "  baseColorTexture:" << gltfModel.textures[texInfo.index].name;
 				auto texture = loadTexture(texInfo.index, TextureFormat::srgba8, material->blendMode() != BlendMode::alphaMask);
 				material->setTexture("albedo", texture);
-			} else {
-				SGD_LOG << "TODO: Skipping baseColor texture with texInfo.texCoord != 0" << texInfo.texCoord;
 			}
 		}
 	}
@@ -234,12 +235,13 @@ Material* GLTFLoader::loadMaterial(int id) {
 
 		auto& texInfo = gltfMat.emissiveTexture;
 		if (texInfo.index >= 0) {
-			if (texInfo.texCoord == 0) {
+			auto texCoord = texInfo.texCoord;
+			if (texCoord != 0 && (texCoord != 1 || !meshHasTexCoords1)) {
+				SGD_LOG << "TODO: Skipping emissive texture with texInfo.texCoord" << texCoord;
+			} else {
 				if (g_loggingEnabled) SGD_LOG << "  emissiveTexture:" << gltfModel.textures[texInfo.index].name;
 				auto texture = loadTexture(texInfo.index, TextureFormat::srgba8, false);
 				material->setTexture("emissive", texture);
-			} else {
-				SGD_LOG << "Todo: Skipping emissive texture with texInfo.texCoord != 0";
 			}
 		}
 	}
@@ -254,13 +256,14 @@ Material* GLTFLoader::loadMaterial(int id) {
 
 		auto& texInfo = pbr.metallicRoughnessTexture;
 		if (texInfo.index >= 0) {
-			if (texInfo.texCoord == 0) {
+			auto texCoord = texInfo.texCoord;
+			if (texCoord != 0 && (texCoord != 1 || !meshHasTexCoords1)) {
+				SGD_LOG << "TODO: Skipping metallicRoughness texture with texInfo.texCoord" << texCoord;
+			} else {
 				if (g_loggingEnabled) SGD_LOG << "  metallicRoughness texture:" << gltfModel.textures[texInfo.index].name;
 				auto texture = loadTexture(texInfo.index, TextureFormat::rgba8, false);
 				material->setTexture("metallic", texture);
 				material->setTexture("roughness", texture);
-			} else {
-				SGD_LOG << "TODO: Skipping metallicRoughness texture with texInfo.texCoord != 0" << texInfo.texCoord;
 			}
 		}
 	}
@@ -269,12 +272,13 @@ Material* GLTFLoader::loadMaterial(int id) {
 	{
 		auto& texInfo = gltfMat.normalTexture;
 		if (texInfo.index >= 0) {
-			if (texInfo.texCoord == 0) {
+			auto texCoord = texInfo.texCoord;
+			if (texCoord != 0 && (texCoord != 1 || !meshHasTexCoords1)) {
+				SGD_LOG << "TODO: Skipping normal texture with texInfo.texCoord" << texCoord;
+			} else {
 				// SGD_ASSERT(texInfo.scale == 1.0f);
 				if (g_loggingEnabled) SGD_LOG << "  normalTexture:" << gltfModel.textures[texInfo.index].name;
 				material->setTexture("normal", loadTexture(texInfo.index, TextureFormat::rgba8, false));
-			} else {
-				SGD_LOG << "TODO: Skipping normal texture with texInfo.texCoord != 0" << texInfo.texCoord;
 			}
 		}
 	}
@@ -283,12 +287,12 @@ Material* GLTFLoader::loadMaterial(int id) {
 	{
 		auto& texInfo = gltfMat.occlusionTexture;
 		if (texInfo.index >= 0) {
-			if (texInfo.texCoord == 0) {
-				SGD_ASSERT(texInfo.texCoord == 0);
+			auto texCoord = texInfo.texCoord;
+			if (texCoord != 0 && (texCoord != 1 || !meshHasTexCoords1)) {
+				SGD_LOG << "TODO: Skipping occlusion texture with texInfo.texCoord" << texCoord;
+			} else {
 				if (g_loggingEnabled) SGD_LOG << "  occlusionTexture:" << gltfModel.textures[texInfo.index].name;
 				material->setTexture("occlusion", loadTexture(texInfo.index, TextureFormat::rgba8, false));
-			} else {
-				SGD_LOG << "TODO: Skipping occlusion texture with texInfo.texCoord != 0" << texInfo.texCoord;
 			}
 		}
 	}
@@ -338,6 +342,7 @@ void GLTFLoader::beginMesh() {
 	meshSurfaces.clear();
 	opaqueSurfaces.clear();
 	meshHasTangents = false;
+	meshHasTexCoords1 = false;
 	meshFlags = MeshFlags::none;
 }
 
@@ -444,17 +449,21 @@ void GLTFLoader::updateMesh(const tinygltf::Primitive& gltfPrim) {
 			for (int i = 0; i < count; ++i) vp[i].tangent.z = -vp[i].tangent.z;
 			meshHasTangents = true;
 			//
-		} else if (attrib.first == "TEXCOORD_0") {
-			//
+		} else if (attrib.first == "TEXCOORD_0" || attrib.first == "TEXCOORD_1") {
 			if (accessor.type == TINYGLTF_TYPE_VEC2) {
 				if (accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT) {
-					copyBufferData(accessor, &vp->texCoords, sizeof(Vertex));
+					if (attrib.first == "TEXCOORD_0") {
+						copyBufferData(accessor, &vp->texCoords, sizeof(Vertex));
+					} else {
+						copyBufferData(accessor, (uint8_t*)&vp->texCoords + sizeof(Vec2f), sizeof(Vertex));
+						meshHasTexCoords1 = true;
+					}
 				} else {
-					SGD_LOG << "TODO: Unsupported TEXCOORD_0 component type:" << accessor.componentType;
+					SGD_LOG << "TODO: Unsupported " << attrib.first << " component type:" << accessor.componentType;
 					continue;
 				}
 			} else {
-				SGD_LOG << "TODO: Unsupported TEXCOORD_0 type:" << accessor.type;
+				SGD_LOG << "TODO: Unsupported " << attrib.first << " type:" << accessor.type;
 				continue;
 			}
 			//

@@ -131,10 +131,11 @@ Texture::Texture(Texture* texture, uint32_t layer)
 }
 
 void Texture::update(const void* src, size_t pitch) {
-	if (m_data->pitch() != pitch) SGD_ERROR("TODO");
-
-	std::memcpy(m_data->data(), src, m_data->pitch() * m_data->size().y);
-
+	auto dstPitch = m_data->pitch();
+	auto n = std::min(dstPitch, pitch);
+	auto s = (const uint8_t*)src;
+	auto d = m_data->data();
+	for (uint32_t y = 0; y < m_data->size().y; ++y, s += pitch, d += dstPitch) std::memcpy(d, s, n);
 	m_dirty = true;
 	invalidate();
 }

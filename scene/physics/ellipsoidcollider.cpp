@@ -25,7 +25,22 @@ Collider* EllipsoidCollider::intersectRay(CLiner ray, float rradius, Contact& co
 }
 
 Collider* EllipsoidCollider::intersectRay(CLiner ray, CVec3f radii, Contact& contact) {
-	SGD_ERROR("TODO");
+	auto rradii = Vec3r(radii) + Vec3r(this->radii());
+	auto invRadii = (real)1 / rradii;
+
+	Liner invRay(ray.o * invRadii, ray.d * contact.time * invRadii);
+
+	Contact invContact = contact;
+	invContact.time = length(invRay.d);
+	invRay.d = normalize(invRay.d);
+
+	if (!intersectRaySphere(invRay, entity()->worldPosition() * invRadii, 1, invContact)) return nullptr;
+
+	contact.point = invContact.point * rradii;
+	contact.normal = normalize(cofactor(Mat3<real>::scale(rradii)) * invContact.normal);
+	contact.time = length(invRay.d * invContact.time * rradii);
+
+	return this;
 }
 
 void EllipsoidCollider::onUpdate(const CollisionSpace* space, uint32_t colliderMask, Vector<Collision>& collisions) {

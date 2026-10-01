@@ -28,6 +28,7 @@ private:
 	Vector<MeshSurface> meshSurfaces;
 	Map<int, uint32_t> opaqueSurfaces;		// keyed by material index, index into meshSurfaces
 	bool meshHasTangents{};
+	bool meshHasTexCoords1{};
 	MeshFlags meshFlags;
 
 	// loadBones

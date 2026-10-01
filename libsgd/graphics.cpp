@@ -340,7 +340,7 @@ void SGD_DECL sgd_SetVertexColor(SGD_Mesh hmesh, int vertex, float r, float g, f
 void SGD_DECL sgd_SetVertexTexCoord0(SGD_Mesh hmesh, int vertex, float u0, float v0) {
 	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
 	if ((uint32_t)vertex >= mesh->vertexCount()) sgdx::error("Vertex index out of range");
-	mesh->lockVertices(vertex, 1)->texCoords = {u0, v0, 0};
+	mesh->lockVertices(vertex, 1)->texCoords = {u0, v0, 0, 0};
 	mesh->unlockVertices();
 }
 
