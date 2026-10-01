@@ -34,7 +34,7 @@ auto init0 =
 
 bool g_robustnessEnabled = true;
 auto init1 =
-	configVarChanged("dawn.robustnessEnabled").connect(nullptr, [](CString value) { g_validationEnabled = truthiness(value); });
+	configVarChanged("dawn.robustnessEnabled").connect(nullptr, [](CString value) { g_robustnessEnabled = truthiness(value); });
 
 Vector<const char*> g_enabledToggles;
 Vector<wgpu::FeatureName> g_requiredFeatures;
