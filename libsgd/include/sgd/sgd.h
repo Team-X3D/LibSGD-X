@@ -947,6 +947,24 @@ SGD_API void SGD_DECL sgd_SetEntityName(SGD_Entity entity, SGD_String name);
 //! Get entity name. The returned string will remain valid until the next call to sgd_GetEntityName.
 SGD_API SGD_String SGD_DECL sgd_GetEntityName(SGD_Entity entity);
 
+//! Add a tag to an entity. Tags are arbitrary strings used to identify or group entities. Adding a tag that already exists has no effect.
+SGD_API void SGD_DECL sgd_AddEntityTag(SGD_Entity entity, SGD_String tag);
+
+//! Remove a tag from an entity.
+SGD_API void SGD_DECL sgd_RemoveEntityTag(SGD_Entity entity, SGD_String tag);
+
+//! Remove all tags from an entity.
+SGD_API void SGD_DECL sgd_ClearEntityTags(SGD_Entity entity);
+
+//! Check if an entity has a tag.
+SGD_API SGD_Bool SGD_DECL sgd_EntityHasTag(SGD_Entity entity, SGD_String tag);
+
+//! Get entity number of tags.
+SGD_API int SGD_DECL sgd_GetEntityTagCount(SGD_Entity entity);
+
+//! Get entity tag by index. tagIndex must be >= 0 and < sgd_GetEntityTagCount(entity). The returned string will remain valid until the next call to sgd_GetEntityTag.
+SGD_API SGD_String SGD_DECL sgd_GetEntityTag(SGD_Entity entity, int tagIndex);
+
 //! Set entity's parent.
 SGD_API void SGD_DECL sgd_SetEntityParent(SGD_Entity entity, SGD_Entity parent);
 

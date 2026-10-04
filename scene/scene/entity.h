@@ -51,6 +51,18 @@ struct Entity : Shared {
 		return m_name;
 	}
 
+	void addTag(CString tag);
+
+	void removeTag(CString tag);
+
+	void clearTags();
+
+	bool hasTag(CString tag) const;
+
+	CVector<String> tags() const {
+		return m_tags;
+	}
+
 	CVector<EntityListenerPtr> listeners() const {
 		return m_listeners;
 	}
@@ -165,6 +177,7 @@ private:
 	bool m_invalid{};
 
 	String m_name;
+	Vector<String> m_tags;
 
 	Entity* m_parent{};
 	Vector<EntityPtr> m_children;

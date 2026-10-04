@@ -50,6 +50,12 @@ struct Deserializer {
 
 		if (!json["name"].is_null()) entity->setName(json["name"].string_value());
 
+		if (!json["tags"].is_null()) {
+			for (const Json& tag : json["tags"].array_items()) {
+				if (tag.is_string()) entity->addTag(tag.string_value());
+			}
+		}
+
 		if (!json["position"].is_null()) entity->setWorldPosition(deserializeVec3f(json["position"]));
 		if (!json["rotation"].is_null()) entity->setWorldBasis(Mat3f::rotation(deserializeVec3f(json["rotation"])));
 		if (!json["scale"].is_null()) entity->setWorldScale(deserializeVec3f(json["scale"]));
@@ -321,6 +327,12 @@ struct Serializer {
 		Json::object json;
 
 		if (!entity->name().empty()) json["name"] = entity->name();
+
+		if (!entity->tags().empty()) {
+			Json::array tags;
+			for (auto& tag : entity->tags()) tags.emplace_back(tag);
+			json["tags"] = std::move(tags);
+		}
 
 		json["position"] = serialize(entity->worldPosition());
 		json["rotation"] = serialize(rotation(entity->worldBasis()));

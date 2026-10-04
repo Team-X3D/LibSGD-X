@@ -6,7 +6,8 @@ namespace sgd {
 
 Entity::Entity(const Entity* that)
 	: m_isEnabled(that->m_isEnabled), //
-	  m_isVisible(that->m_isVisible) {
+	  m_isVisible(that->m_isVisible), //
+	  m_tags(that->m_tags) {
 	for (Entity* child : that->m_children) child->copy()->setParent(this);
 }
 
@@ -139,6 +140,31 @@ void Entity::setParent(Entity* parent) {
 
 void Entity::setName(CString name) {
 	m_name = name;
+}
+
+void Entity::addTag(CString tag) {
+	if (tag.empty() || hasTag(tag)) return;
+	m_tags.emplace_back(tag);
+}
+
+void Entity::removeTag(CString tag) {
+	for (auto it = m_tags.begin(); it != m_tags.end(); ++it) {
+		if (*it == tag) {
+			m_tags.erase(it);
+			return;
+		}
+	}
+}
+
+void Entity::clearTags() {
+	m_tags.clear();
+}
+
+bool Entity::hasTag(CString tag) const {
+	for (auto& t : m_tags) {
+		if (t == tag) return true;
+	}
+	return false;
 }
 
 void Entity::invalidateWorldMatrix() { // NOLINT (recursive)

@@ -172,6 +172,34 @@ SGD_String SGD_DECL sgd_GetEntityName(SGD_Entity hentity) {
 	return name.data();
 }
 
+void SGD_DECL sgd_AddEntityTag(SGD_Entity hentity, SGD_String tag) {
+	sgdx::resolveHandle<sgd::Entity>(hentity)->addTag(tag);
+}
+
+void SGD_DECL sgd_RemoveEntityTag(SGD_Entity hentity, SGD_String tag) {
+	sgdx::resolveHandle<sgd::Entity>(hentity)->removeTag(tag);
+}
+
+void SGD_DECL sgd_ClearEntityTags(SGD_Entity hentity) {
+	sgdx::resolveHandle<sgd::Entity>(hentity)->clearTags();
+}
+
+SGD_Bool SGD_DECL sgd_EntityHasTag(SGD_Entity hentity, SGD_String tag) {
+	return sgdx::resolveHandle<sgd::Entity>(hentity)->hasTag(tag);
+}
+
+int SGD_DECL sgd_GetEntityTagCount(SGD_Entity hentity) {
+	return (int)sgdx::resolveHandle<sgd::Entity>(hentity)->tags().size();
+}
+
+SGD_String SGD_DECL sgd_GetEntityTag(SGD_Entity hentity, int tagIndex) {
+	static sgd::String tag;
+	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
+	if (tagIndex < 0 || tagIndex >= (int)entity->tags().size()) return nullptr;
+	tag = entity->tags()[tagIndex] + '\0';
+	return tag.data();
+}
+
 void SGD_DECL sgd_SetEntityParent(SGD_Entity hentity, SGD_Entity hparent) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
 	auto parent = hparent ? sgdx::resolveHandle<sgd::Entity>(hparent) : nullptr;
