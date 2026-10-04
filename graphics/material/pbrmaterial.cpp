@@ -21,7 +21,7 @@ auto shaderSource{
 BindGroupDescriptor bindGroupDescriptor( //
 	"pbrMaterial", BindGroupType::material,
 	{
-		bufferBindGroupLayoutEntry(0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Uniform), // PBRMaterialUniforms
+		bufferBindGroupLayoutEntry(0, wgpu::ShaderStage::Vertex | wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Uniform), // PBRMaterialUniforms
 		textureBindGroupLayoutEntry(1, wgpu::ShaderStage::Fragment),								  // albedoTexture
 		samplerBindGroupLayoutEntry(2, wgpu::ShaderStage::Fragment),								  // albedoSampler
 		textureBindGroupLayoutEntry(3, wgpu::ShaderStage::Fragment),								  // emissiveTexture

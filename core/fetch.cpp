@@ -12,6 +12,7 @@
 
 #include <json11.hpp>
 
+#include <cstdlib>
 #include <thread>
 
 using namespace json11;
@@ -130,6 +131,25 @@ Expected<bool, FileioEx> fetch(CString url, curl_write_callback writeFunc, void*
 
 	auto turl = url;
 	if (startsWith(url, sgdPrefix)) {
+		static const Path assetsDir = [] {
+			if (auto env = std::getenv("SGD_ASSETS")) return Path(String(env));
+			if (Path dir(SGD_CMAKE_BINARY_DIR "/assets"); dir.isDir()) return dir;
+			if (Path dir("assets"); dir.isDir()) return dir;
+			if (Path dir(SGD_CMAKE_SOURCE_DIR "/assets"); dir.isDir()) return dir;
+			return Path{};
+		}();
+
+		if (!assetsDir.empty()) {
+			auto path = assetsDir / url.substr(6);
+			if (path.isFile()) {
+				auto data = loadData(path);
+				if (!data) return data.error();
+				auto& bytes = data.result();
+				writeFunc((char*)bytes.data(), 1, bytes.size(), writeData);
+				return true;
+			}
+		}
+
 		static const String SGD_URL = "https://skirmish-dev.net/assets/";
 		turl = SGD_URL + url.substr(6);
 	}

@@ -73,7 +73,8 @@ void entry() {
 	DrawListPtr dc = overlay->drawList();
 
 	TerrainColliderPtr terrainCollider = new TerrainCollider(terrain, 0, terrain->bindings());
-	SphereColliderPtr sphereCollider = new SphereCollider(player, 1, 1);
+	// SphereColliderPtr sphereCollider = new SphereCollider(player, 1, 1);
+	EllipsoidColliderPtr ellipsoidCollider = new EllipsoidCollider(player, 1, .5f, 1.8f);
 
 	scene->collisionSpace()->enableCollisions(1, 0, CollisionResponse::slide);
 

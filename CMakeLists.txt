@@ -102,6 +102,7 @@ set(CMAKE_CXX_STANDARD 17)
 #
 include_directories(${CMAKE_SOURCE_DIR})
 add_compile_definitions(SGD_CMAKE_SOURCE_DIR=\"${CMAKE_SOURCE_DIR}\")
+add_compile_definitions(SGD_CMAKE_BINARY_DIR=\"${CMAKE_BINARY_DIR}\")
 
 # Add cmake 'find' scripts
 #

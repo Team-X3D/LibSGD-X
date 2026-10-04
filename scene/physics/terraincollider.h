@@ -32,6 +32,8 @@ private:
 
 	TerrainBindingsPtr m_bindings;
 
+	Vector<Triangle> buildLocalTriangles(CBoxr lbounds) const;
+
 	void onUpdate(const CollisionSpace* space, uint32_t colliderMask, Vector<Collision>& collisions) override;
 };
 

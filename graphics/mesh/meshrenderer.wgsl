@@ -28,7 +28,7 @@ struct Varying {
 	@location(2) tanMatrix0: vec3f,
 	@location(3) tanMatrix1: vec3f,
 	@location(4) tanMatrix2: vec3f,
-	@location(5) texCoords: vec2f,
+	@location(5) texCoords: vec3f,
 	@location(6) color: vec4f,
 };
 
@@ -51,7 +51,7 @@ struct Varying {
     } else {
        	out.tanMatrix2 = normalMatrix * vertex.normal;
     }
-	out.texCoords = material_uniforms.textureScale.x == 2 ? vertex.texCoords.zw : vertex.texCoords.xy;
+	out.texCoords = vec3f(select(vertex.texCoords.xy, vertex.texCoords.zw, material_uniforms.textureScale.x == 2), 0.0);
 	out.color = instance.color * vertex.color;
 
 	return out;

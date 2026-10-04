@@ -1,5 +1,7 @@
 #include "terrainbindings.h"
 
+#include <algorithm>
+
 #include "../core/textureutil.h"
 #include "../material/emissivematerial.h"
 #include "../render/renderqueue.h"
@@ -7,6 +9,48 @@
 namespace sgd {
 
 namespace {
+
+//! Read the red channel of a single texel as a float for any supported height texture format
+float redTexel(const uint8_t* texel, TextureFormat format) {
+	switch (format) {
+	// 8 bit unsigned normalized
+	case TextureFormat::r8:
+	case TextureFormat::rg8:
+	case TextureFormat::rgba8:
+	case TextureFormat::srgba8:
+		return *texel / 255.0f;
+	// 8 bit signed normalized
+	case TextureFormat::r8s:
+	case TextureFormat::rg8s:
+	case TextureFormat::rgba8s:
+		return std::max((float)*(const int8_t*)texel / 127.0f, -1.0f);
+	// 16 bit unsigned normalized
+	case TextureFormat::r16:
+	case TextureFormat::rg16:
+	case TextureFormat::rgba16:
+	case TextureFormat::srgba16:
+		return *(const uint16_t*)texel / 65535.0f;
+	// 16 bit signed normalized
+	case TextureFormat::r16s:
+	case TextureFormat::rg16s:
+	case TextureFormat::rgba16s:
+		return std::max((float)*(const int16_t*)texel / 32767.0f, -1.0f);
+	// 16 bit float
+	case TextureFormat::r16f:
+	case TextureFormat::rg16f:
+	case TextureFormat::rgba16f:
+		return float16ToFloat(*(const float16*)texel);
+	// 32 bit float
+	case TextureFormat::r32f:
+	case TextureFormat::rg32f:
+	case TextureFormat::rgba32f:
+	case TextureFormat::depth32f:
+		return *(const float*)texel;
+	default:
+		SGD_ERROR("Unsupported terrain height texture format");
+		return 0;
+	}
+}
 
 uint32_t rndColor(uint32_t lod) {
 	auto r = (uint32_t)rnd(128) + 128;
@@ -200,22 +244,15 @@ Array<float, 4> TerrainBindings::getLocalQuadVertexHeights(float x, float z) con
 	}
 	auto ix = (uint32_t)(fx + hsize);
 	auto iz = (uint32_t)(fz + hsize);
-	auto data = heightTexture()->data();
 
-	switch (data->format()) {
-	case TextureFormat::r32f: {
-		auto p0 = (float*)(data->data() + iz * data->pitch());
-		auto p1 = (float*)(data->data() + (iz + 1u) * data->pitch());
-		return {p0[ix], p0[ix + 1], p1[ix], p1[ix + 1]};
-	}
-	case TextureFormat::r16f: {
-		auto p0 = (float16*)(data->data() + iz * data->pitch());
-		auto p1 = (float16*)(data->data() + (iz + 1u) * data->pitch());
-		return {(float)p0[ix], (float)p0[ix + 1], (float)p1[ix], (float)p1[ix + 1]};
-	}
-	default:
-		SGD_ERROR("TODO");
-	}
+	auto data = heightTexture()->data();
+	auto format = data->format();
+	auto bpp = data->bpp();
+	auto p0 = data->data() + iz * data->pitch();
+	auto p1 = data->data() + (iz + 1u) * data->pitch();
+
+	return {redTexel(p0 + ix * bpp, format), redTexel(p0 + (ix + 1) * bpp, format), //
+			redTexel(p1 + ix * bpp, format), redTexel(p1 + (ix + 1) * bpp, format)};
 }
 
 float TerrainBindings::getLocalHeight(float x, float z) const {

@@ -18,15 +18,7 @@ TerrainCollider::TerrainCollider(Entity* entity, uint32_t colliderType, TerrainB
 	attach(entity);
 }
 
-Collider* TerrainCollider::intersectRay(CLiner ray, float radius, Contact& contact) {
-
-	Boxr bounds(ray.o);
-	bounds |= ray * contact.time;
-	bounds.min -= radius + boundsPadding;
-	bounds.max += radius + boundsPadding;
-
-	auto lbounds = inverse(entity()->worldMatrix()) * bounds;
-	//	SGD_LOG << "### lbounds"<<lbounds;
+Vector<TerrainCollider::Triangle> TerrainCollider::buildLocalTriangles(CBoxr lbounds) const {
 
 	auto x0 = std::floor(lbounds.min.x);
 	auto z0 = std::floor(lbounds.min.z);
@@ -47,6 +39,20 @@ Collider* TerrainCollider::intersectRay(CLiner ray, float radius, Contact& conta
 			tris.emplace_back(Vec3f(x, heights[2], z + 1), cv, Vec3f(x, heights[0], z));		 // 2,cv,0
 		}
 	}
+	return tris;
+}
+
+Collider* TerrainCollider::intersectRay(CLiner ray, float radius, Contact& contact) {
+
+	Boxr bounds(ray.o);
+	bounds |= ray * contact.time;
+	bounds.min -= radius + boundsPadding;
+	bounds.max += radius + boundsPadding;
+
+	auto lbounds = inverse(entity()->worldMatrix()) * bounds;
+	// SGD_LOG << "### lbounds"<<lbounds;
+
+	auto tris = buildLocalTriangles(lbounds);
 	// SGD_LOG << "###"<<tris.size();
 
 	bool collision = false;
@@ -69,7 +75,45 @@ Collider* TerrainCollider::intersectRay(CLiner ray, float radius, Contact& conta
 }
 
 Collider* TerrainCollider::intersectRay(CLiner ray, CVec3f radii, Contact& contact) {
-	SGD_ERROR("TODO - Ellipsoid -> Terrain interesection");
+	Vec3r rradii(radii);
+	Vec3r invRadii = (real)1 / rradii;
+
+	Liner invRay(ray.o * invRadii, ray.d * contact.time * invRadii);
+
+	Contact invContact = contact;
+	invContact.time = length(invRay.d);
+	invRay.d = normalize(invRay.d);
+
+	Boxr bounds(ray.o);
+	bounds |= ray * contact.time;
+	bounds.min -= rradii + boundsPadding;
+	bounds.max += rradii + boundsPadding;
+
+	auto lbounds = inverse(entity()->worldMatrix()) * bounds;
+
+	auto tris = buildLocalTriangles(lbounds);
+
+	bool collision = false;
+
+	for (auto& tri : tris) {
+		Boxr triBounds(tri.v0);
+		triBounds |= tri.v1;
+		triBounds |= tri.v2;
+		if (!intersects(lbounds, triBounds)) continue;
+
+		auto v0 = entity()->worldMatrix() * tri.v0 * invRadii;
+		auto v1 = entity()->worldMatrix() * tri.v1 * invRadii;
+		auto v2 = entity()->worldMatrix() * tri.v2 * invRadii;
+
+		collision |= intersectRayTriangle(invRay, 1, v0, v1, v2, invContact);
+	}
+	if (!collision) return nullptr;
+
+	contact.point = invContact.point * rradii;
+	contact.normal = normalize(invContact.normal * invRadii);
+	contact.time = length(invRay.d * invContact.time * rradii);
+
+	return this;
 }
 
 void TerrainCollider::onUpdate(const CollisionSpace* space, uint32_t colliderMask, Vector<Collision>& collisions) {

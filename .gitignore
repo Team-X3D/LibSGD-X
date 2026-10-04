@@ -30,3 +30,6 @@ out
 # python cache and virtual environment
 __pycache__
 venv
+
+# Local assets (download separately)
+assets/
